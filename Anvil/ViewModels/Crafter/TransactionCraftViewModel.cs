@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
+using TokenAccount = Solnet.Rpc.Models.TokenAccount;
 
 namespace Anvil.ViewModels.Crafter
 {

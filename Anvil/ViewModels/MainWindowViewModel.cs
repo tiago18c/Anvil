@@ -29,6 +29,9 @@ using Avalonia.Threading;
 using Anvil.Services.Wallets.Enums;
 using Anvil.Services.Enums;
 using System.Linq;
+using Anvil.ViewModels.NameService;
+using Anvil.ViewModels.NFTs;
+using Anvil.ViewModels.Forensic;
 
 namespace Anvil.ViewModels
 {
@@ -73,6 +76,7 @@ namespace Anvil.ViewModels
         private UnlockWalletViewModel _unlockWalletViewModel;
         private SettingsViewModel _settingsViewModel;
         private WatchOnlyViewModel _watchOnlyViewModel;
+        private NameServiceViewModel _nameServiceViewModel;
 
         #endregion
 
@@ -416,6 +420,18 @@ namespace Anvil.ViewModels
                     _settingsViewModel ??= new SettingsViewModel(_appState, _rpcProvider);
                     CurrentView = _settingsViewModel;
                     break;
+                case "Name Service":
+                    _nameServiceViewModel ??= new NameServiceViewModel(_rpcProvider);
+                    CurrentView = _nameServiceViewModel;
+                    break;
+                case "NFTs":
+                    _nftsViewModel ??= new NFTViewModel(_rpcProvider);
+                    CurrentView = _nftsViewModel;
+                    break;
+                case "Forensic":
+                    _forensicViewModel ??= new ForensicViewModel(_rpcProvider);
+                    CurrentView = _forensicViewModel;
+                    break;
                 default:
                     break;
             }
@@ -474,6 +490,9 @@ namespace Anvil.ViewModels
         }
 
         private string _networkConnectionStatus = "Checking network..";
+        private NFTViewModel _nftsViewModel;
+        private ForensicViewModel _forensicViewModel;
+
         public string NetworkConnectionStatus
         {
             get => _networkConnectionStatus;

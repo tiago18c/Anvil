@@ -187,6 +187,48 @@
 						Command="{Binding ChangeView}"
 						CommandParameter="MultiSigs"
 						ToolTip.Tip="View and Manage Multi Signature Accounts"/>
+
+					<Button
+						Margin="0,10,0,10"
+						Content="Name Service"
+						Width="125"
+						Background="Transparent"
+						BorderBrush="Transparent"
+						VerticalAlignment="Center"
+						HorizontalAlignment="Center"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Command="{Binding ChangeView}"
+						CommandParameter="Name Service"
+						ToolTip.Tip="Lookup .sol and twitter names"/>
+          
+					<Button
+						Margin="0,10,0,10"
+						Content="NFTs"
+						Width="125"
+						Background="Transparent"
+						BorderBrush="Transparent"
+						VerticalAlignment="Center"
+						HorizontalAlignment="Center"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Command="{Binding ChangeView}"
+						CommandParameter="NFTs"
+						ToolTip.Tip="NFT Tools"/>
+          
+					<Button
+						Margin="0,10,0,10"
+						Content="Forensic"
+						Width="125"
+						Background="Transparent"
+						BorderBrush="Transparent"
+						VerticalAlignment="Center"
+						HorizontalAlignment="Center"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Command="{Binding ChangeView}"
+						CommandParameter="Forensic"
+						ToolTip.Tip="Forensic Tools"/>
 				</StackPanel>
 			</DockPanel>
 		</styles:Card>
