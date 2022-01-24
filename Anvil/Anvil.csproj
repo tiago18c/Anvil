@@ -2,7 +2,6 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <Nullable>enable</Nullable>
 	<AssemblyName>Anvil</AssemblyName>
 	<RootNamespace>Anvil</RootNamespace>
   </PropertyGroup>
@@ -16,6 +15,11 @@
     <AvaloniaXaml Remove="Views\Crafter\TransactionCraftView.axaml" />
     <AvaloniaXaml Remove="Views\Crafter\TransactionSendView.axaml" />
     <AvaloniaXaml Remove="Views\Crafter\TransactionSignView.axaml" />
+    <AvaloniaXaml Remove="Views\NameService\NameServiceView.axaml" />
+    <AvaloniaXaml Remove="Views\NameService\SolNamingView.axaml" />
+    <AvaloniaXaml Remove="Views\NameService\TokenNamingView.axaml" />
+    <AvaloniaXaml Remove="Views\NameService\TwitterNamingView.axaml" />
+    <AvaloniaXaml Remove="Views\NFTs\NFTView.axaml" />
     <AvaloniaXaml Remove="Views\Wallet\WalletView.axaml" />
     <None Remove=".gitignore" />
   </ItemGroup>
@@ -30,6 +34,21 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Crafter\TransactionSignView.axaml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\NameService\TwitterNamingView.axaml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\NameService\TokenNamingView.axaml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\NameService\SolNamingView.axaml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\NameService\NameServiceView.axaml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\NFTs\NFTView.axaml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Wallet\WalletView.axaml">
@@ -71,6 +90,21 @@
     </Compile>
     <Compile Update="Views\Crafter\TransactionSignView.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <Compile Update="Views\NameService\TwitterNamingView.axaml.cs">
+      <DependentUpon>TwitterNamingView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\NameService\TokenNamingView.axaml.cs">
+      <DependentUpon>TokenNamingView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\NameService\SolNamingView.axaml.cs">
+      <DependentUpon>SolNamingView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\NameService\NameServiceView.axaml.cs">
+      <DependentUpon>NameServiceView.axaml</DependentUpon>
+    </Compile>
+    <Compile Update="Views\NFTs\NFTView.axaml.cs">
+      <DependentUpon>NFTView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\UnlockWalletView.axaml.cs">
       <DependentUpon>UnlockWalletView.axaml</DependentUpon>

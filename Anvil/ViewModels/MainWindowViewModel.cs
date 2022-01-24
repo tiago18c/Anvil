@@ -11,6 +11,7 @@ using Anvil.ViewModels.Wallet;
 using Anvil.Models;
 using Anvil.Services.Store;
 using Anvil.ViewModels.MultiSignatures;
+using Anvil.ViewModels.NameService;
 
 namespace Anvil.ViewModels
 {
@@ -30,6 +31,7 @@ namespace Anvil.ViewModels
         private ImportWalletViewModel _importWalletViewModel;
         private UnlockWalletViewModel _unlockWalletViewModel;
         private SettingsViewModel _settingsViewModel;
+        private NameServiceViewModel _nameServiceViewModel;
 
         public MainWindowViewModel(ApplicationState appState)
         {
@@ -128,6 +130,10 @@ namespace Anvil.ViewModels
                 case "Settings":
                     _settingsViewModel ??= new SettingsViewModel(_appState, _rpcProvider);
                     CurrentView = _settingsViewModel;
+                    break;
+                case "Name Service":
+                    _nameServiceViewModel ??= new NameServiceViewModel(_rpcProvider);
+                    CurrentView = _nameServiceViewModel;
                     break;
                 default:
                     break;
