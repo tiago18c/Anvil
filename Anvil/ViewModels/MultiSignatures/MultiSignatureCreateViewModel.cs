@@ -4,6 +4,7 @@ using Anvil.ViewModels.Fields;
 using ReactiveUI;
 using Solnet.Programs;
 using Solnet.Programs.Models;
+using Solnet.Programs.Models.TokenProgram;
 using Solnet.Programs.Utilities;
 using Solnet.Rpc;
 using Solnet.Rpc.Builders;

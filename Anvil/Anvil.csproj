@@ -15,6 +15,7 @@
     <AvaloniaXaml Remove="Views\Crafter\TransactionCraftView.axaml" />
     <AvaloniaXaml Remove="Views\Crafter\TransactionSendView.axaml" />
     <AvaloniaXaml Remove="Views\Crafter\TransactionSignView.axaml" />
+    <AvaloniaXaml Remove="Views\NameService\AllNamesView.axaml" />
     <AvaloniaXaml Remove="Views\NameService\NameServiceView.axaml" />
     <AvaloniaXaml Remove="Views\NameService\SolNamingView.axaml" />
     <AvaloniaXaml Remove="Views\NameService\TokenNamingView.axaml" />
@@ -34,6 +35,9 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\Crafter\TransactionSignView.axaml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\NameService\AllNamesView.axaml">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\NameService\TwitterNamingView.axaml">
@@ -58,16 +62,17 @@
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.10.10" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.10" />
+    <PackageReference Include="Svg.Skia" Version="0.5.11" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="0.10.10" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.10" />
     <PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.10.4" />
     <PackageReference Include="Material.Avalonia" Version="2.4.0" />
-    <PackageReference Include="Solnet.Extensions" Version="0.4.18" />
-    <PackageReference Include="Solnet.KeyStore" Version="0.4.18" />
-    <PackageReference Include="Solnet.Programs" Version="0.4.18" />
-    <PackageReference Include="Solnet.Rpc" Version="0.4.18" />
-    <PackageReference Include="Solnet.Wallet" Version="0.4.18" />
+    <PackageReference Include="Solnet.Extensions" Version="0.4.20" />
+    <PackageReference Include="Solnet.KeyStore" Version="0.4.20" />
+    <PackageReference Include="Solnet.Programs" Version="0.4.20" />
+    <PackageReference Include="Solnet.Rpc" Version="0.4.20" />
+    <PackageReference Include="Solnet.Wallet" Version="0.4.20" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Anvil.Core\Anvil.Core.csproj" />
@@ -90,6 +95,9 @@
     </Compile>
     <Compile Update="Views\Crafter\TransactionSignView.axaml.cs">
       <DependentUpon>%(Filename)</DependentUpon>
+    </Compile>
+    <Compile Update="Views\NameService\AllNamesView.axaml.cs">
+      <DependentUpon>AllNamesView.axaml</DependentUpon>
     </Compile>
     <Compile Update="Views\NameService\TwitterNamingView.axaml.cs">
       <DependentUpon>TwitterNamingView.axaml</DependentUpon>

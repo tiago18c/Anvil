@@ -38,7 +38,9 @@ namespace Anvil.ViewModels.NameService
             {
                 new SolNamingViewModel(rpcProvider),
                 new TokenNamingViewModel(rpcProvider),
-                new TwitterNamingViewModel(rpcProvider)
+                new TwitterNamingViewModel(rpcProvider),
+                new AllNamesViewModel(rpcProvider)
+
             };
         }
 

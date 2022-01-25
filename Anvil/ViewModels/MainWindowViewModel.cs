@@ -97,6 +97,8 @@ namespace Anvil.ViewModels
                 _appState.MnemonicStoreFilePath = walletImport.MnemonicStorePath;
                 _appState.MnemonicSaved = walletImport.SaveMnemonic;
 
+                _walletService.AddWallet(new PrivateKeyWallet(new Solnet.Wallet.Wallet(walletImport.Mnemonic)));
+
                 _walletViewModel ??= new WalletViewModel(_walletService, _rpcProvider);
                 CurrentView = _walletViewModel;
                 WalletUnlocked = true;

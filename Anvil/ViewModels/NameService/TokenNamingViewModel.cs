@@ -1,9 +1,18 @@
 
 using Anvil.Core.ViewModels;
 using Anvil.Services;
+using Avalonia.Media.Imaging;
 using ReactiveUI;
 using Solnet.Programs.Clients;
 using Solnet.Programs.Models.NameService;
+using System;
+using System.IO;
+using System.Net;
+using System.Threading.Tasks;
+
+using SkiaSharp;
+using Svg.Skia;
+
 
 namespace Anvil.ViewModels.NameService
 {
@@ -22,6 +31,13 @@ namespace Anvil.ViewModels.NameService
         {
             get => _reverseMintNameRecord;
             set => this.RaiseAndSetIfChanged(ref _reverseMintNameRecord, value);
+        }
+
+        private Bitmap _tokenIcon;
+        public Bitmap Icon
+        {
+            get => _tokenIcon;
+            set => this.RaiseAndSetIfChanged(ref _tokenIcon, value);
         }
 
         public string TokenMintQuery { get; set; }
@@ -75,6 +91,7 @@ namespace Anvil.ViewModels.NameService
                 MintNameRecord = null;
             }
 
+            Icon = await LoadIcon(MintNameRecord?.Value?.LogoUri);
 
             LoadingMint = false;
         }
@@ -94,6 +111,47 @@ namespace Anvil.ViewModels.NameService
 
 
             LoadingTicker = false;
+        }
+
+        public async Task<Bitmap> LoadIcon(string uri)
+        {
+            if (string.IsNullOrEmpty(uri)) return null;
+
+            try
+            {
+                using (var wc = new WebClient())
+                {
+                    var ico = await wc.DownloadDataTaskAsync(uri);
+
+                    if(uri.EndsWith(".svg"))
+                    {
+                        ico = ConvertSvgToBitmap(ico);
+                    }
+
+
+                    Bitmap b = new Bitmap(new MemoryStream(ico));
+
+                    return b;
+                }
+            }
+            catch (Exception _)
+            {
+                return null;
+            }
+        }
+
+        private byte[] ConvertSvgToBitmap(byte[] ico)
+        {
+            using(var svg = new SKSvg())
+            {
+                svg.Load(new MemoryStream(ico));
+
+                var res = new MemoryStream();
+
+                svg.Save(res, SKColor.Empty);
+
+                return res.ToArray();
+            }
         }
     }
 }

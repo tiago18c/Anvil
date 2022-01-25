@@ -5,6 +5,7 @@ using ReactiveUI;
 using Solnet.Extensions;
 using Solnet.Programs;
 using Solnet.Programs.Models;
+using Solnet.Programs.Models.TokenProgram;
 using Solnet.Rpc;
 using Solnet.Rpc.Models;
 using Solnet.Rpc.Utilities;
@@ -13,6 +14,7 @@ using Solnet.Wallet.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TokenAccount = Solnet.Rpc.Models.TokenAccount;
 
 namespace Anvil.ViewModels.Crafter
 {
