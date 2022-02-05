@@ -7,179 +7,83 @@
 			 mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Anvil.Views.NFTs.NFTView">
 
-	<DockPanel LastChildFill="True">
-		<styles:Card
-			Margin="5,5,0,5"
-			DockPanel.Dock="Left">
-			<DockPanel>
-				<StackPanel
-					Orientation="Horizontal"
-					DockPanel.Dock="Bottom"
-					HorizontalAlignment="Stretch"
-					VerticalAlignment="Bottom">
-					<Button
-						Margin="5"
-						VerticalAlignment="Center"
-						HorizontalAlignment="Center"
-						Background="{DynamicResource ButtonBackgroundColor}"
-						Content="Derive Wallet"/>
-				</StackPanel>
-				<TextBlock
-					Classes="Headline5 Subheadline2"
-					DockPanel.Dock="Top"
-					VerticalAlignment="Center"
-					HorizontalAlignment="Left"
-					TextAlignment="Center"
-					Foreground="{DynamicResource MainTextAccent}"
-					Text="Wallets">
-				</TextBlock>
-				<ListBox>
-				</ListBox>
-			</DockPanel>
-		</styles:Card>
-		<styles:Card
-			Margin="5,5,5,5"
-			DockPanel.Dock="Right">
-			<DockPanel>
-				<TextBlock
-					Classes="Headline5 Subheadline2"
-					DockPanel.Dock="Top"
-					VerticalAlignment="Center"
-					HorizontalAlignment="Left"
-					TextAlignment="Center"
-					Foreground="{DynamicResource MainTextAccent}"
-					Text="Current Wallet">
-				</TextBlock>
-				<StackPanel
-					DockPanel.Dock="Top"
-					Orientation="Vertical"
-					HorizontalAlignment="Center"
-					Margin="10">
-					<StackPanel Orientation="Horizontal">
-						<TextBlock Classes="Body1" Text="{Binding PublicKey.Key}" Margin="0" VerticalAlignment="Center"/>
-						<Button Classes="Flat Accent" ToolTip.Tip="Copy address to clipboard" VerticalAlignment="Center" Command="{Binding CopyAddressToClipboard}" Height="24" Width="24" Padding="0">
-							<avalonia:MaterialIcon Kind="ContentCopy" />
-						</Button>
-					</StackPanel>
-					<TextBlock
-						Classes="Headline6 Subheadline2"
-						VerticalAlignment="Top"
-						HorizontalAlignment="Center"
-						TextAlignment="Center"
-						Margin="5"
-						Foreground="{DynamicResource MainTextAccent}"
-						Text="Balance">
-					</TextBlock>
-					<StackPanel
-						Orientation="Horizontal"
-						HorizontalAlignment="Center"
-						VerticalAlignment="Center">
-						<TextBlock
-							Classes="Body1"
-							VerticalAlignment="Top"
-							HorizontalAlignment="Center"
-							TextAlignment="Center"
-							Margin="5"
-							Foreground="{DynamicResource MainTextAccent}"
-							Text="{Binding CurrentBalance}">
-						</TextBlock>
-						<TextBlock
-							Classes="Body1"
-							VerticalAlignment="Top"
-							HorizontalAlignment="Center"
-							TextAlignment="Center"
-							Margin="5"
-							Foreground="{DynamicResource MainTextAccent}"
-							Text="SOL">
-						</TextBlock>
-					</StackPanel>
-				</StackPanel>
-				<StackPanel
-					DockPanel.Dock="Bottom"
-					Orientation="Vertical"
-					HorizontalAlignment="Center"
-					Margin="10">
-					<TextBlock
-						Classes="Headline6 Subheadline2"
-						VerticalAlignment="Center"
-						HorizontalAlignment="Center"
-						TextAlignment="Center"
-						Foreground="{DynamicResource MainTextAccent}"
-						Text="Token Accounts">
-					</TextBlock>
+  <DockPanel
+    Margin="5">
+    <styles:Card>
+      <DockPanel>
+        <TextBlock DockPanel.Dock="Top" Classes="Headline5" VerticalAlignment="Center" HorizontalAlignment="Left">NFT Tools</TextBlock>
 
-					<ScrollViewer VerticalScrollBarVisibility="Auto" Margin="8">
+        <styles:Card DockPanel.Dock="Top">
 
-						<ItemsControl Items="{Binding FilteredTokenCollection}"  >
+          <DockPanel>
 
-							<ItemsControl.ItemTemplate>
-								<DataTemplate>
-									<styles:Card Height="60" HorizontalAlignment="Stretch" Background="{DynamicResource Card2BackgroundColor}" Padding="0" Margin="2">
-										<DockPanel>
-											<Image
-												DockPanel.Dock="Left"
-												VerticalAlignment="Center"
-												HorizontalAlignment="Center"
-												Margin="10,0,10,0"
-												Height="40" Width="40"
-												Source="{Binding Symbol, Converter={StaticResource CoinAssetConverter}, ConverterParameter=0}"/>
+            <DockPanel DockPanel.Dock="Top">
+              <TextBlock Classes="Headline5" DockPanel.Dock="Top" VerticalAlignment="Center" HorizontalAlignment="Left">NFT Tools</TextBlock>
+              <TextBox DockPanel.Dock="Left" Margin="10,0" Width="256" Text="{Binding SearchString}"></TextBox>
+              <Button DockPanel.Dock="Left" HorizontalAlignment="Left"
+                      Margin="5,0"
+                      Classes="Filled"
+                      Command="{Binding QueryByAddress}"
+                      Width="75"
+                      IsEnabled="{Binding !LoadingNFT}">
+                <Grid>
+                  <TextBlock IsVisible="{Binding !LoadingNFT}" VerticalAlignment="Center" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center">Query</TextBlock>
+                  <ProgressBar VerticalAlignment="Center" Grid.Column="0" Grid.Row="0" HorizontalAlignment="Center" Classes="Circle" IsIndeterminate="True" IsVisible="{Binding LoadingNFT}"  Width="20"  Height="20"  MinWidth="20"/>
+                </Grid>
+              </Button>
+            </DockPanel>
+
+            <DockPanel DockPanel.Dock="Top" Margin="10" MaxHeight="400" HorizontalAlignment="Stretch" LastChildFill="True">
+
+              <Image Width="400" Height="400" DockPanel.Dock="Left" Source="{Binding Bmp}"/>
+              <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Stretch">
+                <Button Command="{Binding Save}">Save NFT</Button>
+                <Button Command="{Binding SaveMetadata}">Save Metadata</Button>
+                <Button Command="{Binding FindHolders}">Find Holders</Button>
+              </StackPanel>
+
+              <styles:Card HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <DockPanel LastChildFill="True">
+                  <TextBlock DockPanel.Dock="Top"
+                    Text="Metadata"
+                    Classes="Headline5"
+              />
+
+                  <TextBox Classes="Solo" IsReadOnly="True"  Text="{Binding Result}" AcceptsReturn="True" TextWrapping="Wrap" />
+                </DockPanel>
+              </styles:Card>
 
 
-											<Button DockPanel.Dock="Right" Classes="Flat Accent" ToolTip.Tip="Send" VerticalAlignment="Center" CommandParameter="{Binding}" Command="{Binding $parent[ItemsControl].DataContext.Send}" Margin="0,0,20,0">
-												<avalonia:MaterialIcon Kind="Send" />
-											</Button>
 
-											<StackPanel Orientation="Vertical" VerticalAlignment="Center">
-												<StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-													<TextBlock Text="{Binding FullDisplayName}" Classes="Body1"/>
-													<Button Classes="Flat Accent" ToolTip.Tip="Copy address to clipboard" VerticalAlignment="Center" Margin="5,0" Height="24" Width="24" Padding="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"  Command="{Binding CopyAddressToClipboard}">
-														<avalonia:MaterialIcon Kind="ContentCopy"/>
-													</Button>
-													<Button Name="editButton"  Classes="Flat Accent" ToolTip.Tip="Edit Name"  VerticalAlignment="Center" IsEnabled="False">
-														<avalonia:MaterialIcon Kind="Edit" />
-														<Interaction.Behaviors>
-															<DataTriggerBehavior Binding="{Binding TokenName}" ComparisonCondition="Equal" Value="{x:Null}">
-																<ChangePropertyAction PropertyName="IsVisible" TargetObject="{Binding #editButton}" Value="True"/>
-															</DataTriggerBehavior>
-															<DataTriggerBehavior Binding="{Binding TokenName}" ComparisonCondition="NotEqual" Value="{x:Null}">
-																<ChangePropertyAction PropertyName="IsVisible" TargetObject="{Binding #editButton}" Value="False"/>
-															</DataTriggerBehavior>
-														</Interaction.Behaviors>
-													</Button>
-												</StackPanel>
+            </DockPanel>
 
+          </DockPanel>
+        </styles:Card>
 
-												<StackPanel Orientation="Horizontal" DockPanel.Dock="Top">
-													<TextBlock Text="Amount: " Classes="Body2"/>
-													<TextBlock Text="{Binding Amount}" Classes="Body2"/>
+        <styles:Card>
+          
+          
+        </styles:Card>
+        
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal">
+          <Button Command="{Binding ExportOwners}">Export</Button>
+        </StackPanel>
+        <ItemsRepeater DockPanel.Dock="Left" Items="{Binding Mints}" Width="450" Margin="10" >
+          <ItemsRepeater.ItemTemplate>
+            <DataTemplate>
+              <TextBlock Text="{Binding PublicKey}" />
+            </DataTemplate>
+          </ItemsRepeater.ItemTemplate>
+        </ItemsRepeater>
+        <DataGrid DockPanel.Dock="Left" Items="{Binding Pairs}" Width="450">
+          <DataGrid.Columns>
+            <DataGridTextColumn Header="Owner" Binding="{Binding Key}" />
+            <DataGridTextColumn Header="Quantity" Binding="{Binding Value}" />
+          </DataGrid.Columns>
+        </DataGrid>
+      </DockPanel>
+    </styles:Card>
 
-												</StackPanel>
-												<StackPanel Name="valuePanel" Orientation="Horizontal" DockPanel.Dock="Top">
-													<TextBlock Text="Value: $" Classes="Body2"/>
-													<TextBlock Text="{Binding TotalValue} " Classes="Body2"/>
-													<Interaction.Behaviors>
-														<DataTriggerBehavior Binding="{Binding HasTotalValue}" ComparisonCondition="Equal" Value="False">
-															<ChangePropertyAction PropertyName="IsVisible" TargetObject="{Binding #valuePanel}" Value="False"/>
-														</DataTriggerBehavior>
-														<DataTriggerBehavior Binding="{Binding HasTotalValue}" ComparisonCondition="Equal" Value="True">
-															<ChangePropertyAction PropertyName="IsVisible" TargetObject="{Binding #valuePanel}" Value="True"/>
-														</DataTriggerBehavior>
-													</Interaction.Behaviors>
-												</StackPanel>
-											</StackPanel>
-
-
-										</DockPanel>
-									</styles:Card>
-								</DataTemplate>
-							</ItemsControl.ItemTemplate>
-
-						</ItemsControl>
-					</ScrollViewer>
-					
-				</StackPanel>
-			</DockPanel>
-		</styles:Card>
-	</DockPanel>
+  </DockPanel>
 
 </UserControl>

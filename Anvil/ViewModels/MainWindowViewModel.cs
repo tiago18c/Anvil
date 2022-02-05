@@ -12,6 +12,7 @@ using Anvil.Models;
 using Anvil.Services.Store;
 using Anvil.ViewModels.MultiSignatures;
 using Anvil.ViewModels.NameService;
+using Anvil.ViewModels.NFTs;
 
 namespace Anvil.ViewModels
 {
@@ -137,6 +138,10 @@ namespace Anvil.ViewModels
                     _nameServiceViewModel ??= new NameServiceViewModel(_rpcProvider);
                     CurrentView = _nameServiceViewModel;
                     break;
+                case "NFTs":
+                    _nftsViewModel ??= new NFTViewModel(_rpcProvider);
+                    CurrentView = _nftsViewModel;
+                    break;
                 default:
                     break;
             }
@@ -164,6 +169,8 @@ namespace Anvil.ViewModels
         }
 
         private string _networkConnectionStatus = "Checking network..";
+        private NFTViewModel _nftsViewModel;
+
         public string NetworkConnectionStatus
         {
             get => _networkConnectionStatus;
