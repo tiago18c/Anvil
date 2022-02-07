@@ -12,6 +12,7 @@ using Solnet.Rpc.Utilities;
 using Solnet.Wallet;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -21,6 +22,26 @@ using System.Threading.Tasks;
 
 namespace Anvil.ViewModels.NFTs
 {
+    public class OwnerCountVM : ViewModelBase
+    {
+        private string _owner;
+
+        public string Owner
+        {
+            get => _owner;
+            set => this.RaiseAndSetIfChanged(ref _owner, value);
+        }
+
+        private int _count;
+
+        public int Count
+        {
+            get => _count;
+            set => this.RaiseAndSetIfChanged(ref _count, value);
+        }
+
+    }
+
     public class NFTViewModel : ViewModelBase
     {
         public string Header => "Find Holders";
@@ -36,7 +57,7 @@ namespace Anvil.ViewModels.NFTs
 
 
         private string _result;
-        private IReadOnlyCollection<KeyValuePair<string, int>> _pairs;
+        private ObservableCollection<OwnerCountVM> _pairs;
         private double _progress;
         private bool _isProcessing;
         private string auth;
@@ -48,7 +69,7 @@ namespace Anvil.ViewModels.NFTs
             set => this.RaiseAndSetIfChanged(ref _result, value);
         }
 
-        public IReadOnlyCollection<KeyValuePair<string, int>> Pairs
+        public ObservableCollection<OwnerCountVM> Pairs
         {
             get => _pairs;
             set => this.RaiseAndSetIfChanged(ref _pairs, value);
@@ -62,11 +83,35 @@ namespace Anvil.ViewModels.NFTs
 
 
         private bool _loadingNFT = false;
-        public bool LoadingNFT
+        public bool Loading
         {
             get => _loadingNFT;
             set => this.RaiseAndSetIfChanged(ref _loadingNFT, value);
         }
+
+        private bool _loadedNFT = false;
+        public bool LoadedNFT
+        {
+            get => _loadedNFT;
+            set => this.RaiseAndSetIfChanged(ref _loadedNFT, value);
+        }
+
+        private bool _showCollectionOwners = false;
+        public bool ShowCollectionOwners
+        {
+            get => _showCollectionOwners;
+            set => this.RaiseAndSetIfChanged(ref _showCollectionOwners, value);
+        }
+
+
+        private string _status;
+
+        public string Status
+        {
+            get =>_status;
+            set => this.RaiseAndSetIfChanged(ref _status, value);
+        }
+
 
         public byte[] NftData { get; set; }
 
@@ -92,8 +137,26 @@ namespace Anvil.ViewModels.NFTs
             set => this.RaiseAndSetIfChanged(ref _canQueryHolders, value);
         }
 
-        private List<AccountKeyPair> _mints;
-        public List<AccountKeyPair> Mints
+        
+        private bool _canExportMints = false;
+        public bool CanExportMints
+        {
+            get => _canExportMints;
+            set => this.RaiseAndSetIfChanged(ref _canExportMints, value);
+        }
+
+        
+        private bool _canExportHolders = false;
+        public bool CanExportHolders
+        {
+            get => _canExportHolders;
+            set => this.RaiseAndSetIfChanged(ref _canExportHolders, value);
+        }
+
+        
+
+        private List<string> _mints;
+        public List<string> Mints
         {
             get => _mints;
             set
@@ -158,43 +221,138 @@ namespace Anvil.ViewModels.NFTs
 
         public async void FindMints()
         {
-            Mints = (await rpc.GetProgramAccountsAsync("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
-                memCmpList: new List<MemCmp>() { new MemCmp() { Bytes = auth, Offset = 326 } }))?.Result;
         }
 
         public async void FindHolders()
         {
+            Loading = true;
+
+            Status = "Fetching Mints...";
+
+            Mints = new();
+            Pairs = new();
+
+            CanExportHolders = false;
+            CanExportMints = false;
+
+            var metaAccs = await rpc.GetProgramAccountsAsync("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
+                memCmpList: new List<MemCmp>() { new MemCmp() { Bytes = auth, Offset = 326 } });
 
 
-            Dictionary<string, int> accounts = new();
+            List<string> mintList = new();
+
+            foreach(var acc in metaAccs.Result)
+            {
+                var bytes = Convert.FromBase64String(acc.Account.Data[0]);
+                var pkey = new ReadOnlySpan<byte>(bytes).GetPubKey(33);
+                mintList.Add(pkey.Key);
+            }
+
+
+            Mints = mintList;
+
+            CanExportMints = true;
+
+            ShowCollectionOwners = true;
+
+            Dictionary<string, OwnerCountVM> accounts = new();
             int tot = 0;
+            Pairs = new();
+
+            
+
             foreach (var mint in Mints)
             {
-
-                var bytes = Convert.FromBase64String(mint.Account.Data[0]);
-
-                var pkey = new ReadOnlySpan<byte>(bytes).GetPubKey(33);
+                Status = $"Fetching Owners {tot}/{Mints.Count}...";
 
 
-                var largest = await rpc.GetTokenLargestAccountsAsync(pkey);
+                var largest = await rpc.GetTokenLargestAccountsAsync(mint);
 
-                var acc = await rpc.GetTokenAccountInfoAsync(largest.Result.Value[0].Address);
+                if (largest.Result.Value.Count > 0)
+                {
 
-                var owner = acc.Result.Value.Data.Parsed.Info.Owner;
+                    var acc = await rpc.GetTokenAccountInfoAsync(largest.Result.Value[0].Address);
 
-                int count = 0;
-                accounts.TryGetValue(owner, out count);
-                count++;
-                accounts[owner] = count;
+                    var owner = acc.Result.Value.Data.Parsed.Info.Owner;
+
+                    if (!accounts.TryGetValue(owner, out OwnerCountVM vm))
+                    {
+                        vm = new()
+                        {
+                            Owner = owner
+                        };
+                        accounts.Add(owner, vm);
+                        Pairs.Add(vm);
+                    }
+
+                    vm.Count++;
+                }
+
                 tot++;
                 Progress = (double)tot / Mints.Count * 100;
             }
-            Pairs = accounts;
+
+            Status = "";
+
+            Loading = false;
+            CanExportHolders = true;
+        }
+
+        public async void ExportMints()
+        {
+            var sfd = new SaveFileDialog()
+            {
+                Title = "Save Mints",
+                DefaultExtension = ".txt",
+                Directory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)
+            };
+
+
+            if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                var selected = await sfd.ShowAsync(desktop.MainWindow);
+                if (selected == null) return;
+                if (selected.Length > 0)
+                {
+                    using (var s = new StreamWriter(selected))
+                    {
+                        foreach (var mint in Mints)
+                            await s.WriteLineAsync(mint);
+                    }
+                }
+            }
+        }
+
+        public async void ExportOwners()
+        {
+            var sfd = new SaveFileDialog()
+            {
+                Title = "Export Owners",
+                DefaultExtension = ".csv",
+                Directory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                Filters = new List<FileDialogFilter>() {  new FileDialogFilter() { Extensions = new List<string>() { "csv"}, Name = "Comma-Separated Values" } }
+            };
+
+
+            if (Application.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            {
+                var selected = await sfd.ShowAsync(desktop.MainWindow);
+                if (selected == null) return;
+                if (selected.Length > 0)
+                {
+                    using (var s = new StreamWriter(selected))
+                    {
+                        await s.WriteLineAsync("Owner,Count");
+                        foreach (var o in Pairs)
+                            await s.WriteLineAsync($"{o.Owner},{o.Count}");
+                    }
+                }
+            }
         }
 
         public async void QueryByAddress()
         {
-            LoadingNFT = true;
+            Loading = true;
 
             List<byte[]> seeds = new List<byte[]>();
             var metaProgram = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
@@ -236,7 +394,8 @@ namespace Anvil.ViewModels.NFTs
 
             Result = newJson;
 
-            LoadingNFT = false;
+            Loading = false;
+            LoadedNFT = true;
         }
 
         public async void Search()
@@ -280,7 +439,6 @@ namespace Anvil.ViewModels.NFTs
 
             IsProcessing = false;
             Progress = 0;
-
         }
 
         private string ParseUri(byte[] data)
