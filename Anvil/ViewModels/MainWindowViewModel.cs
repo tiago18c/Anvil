@@ -13,6 +13,7 @@ using Anvil.Services.Store;
 using Anvil.ViewModels.MultiSignatures;
 using Anvil.ViewModels.NameService;
 using Anvil.ViewModels.NFTs;
+using Anvil.ViewModels.Forensic;
 
 namespace Anvil.ViewModels
 {
@@ -142,6 +143,10 @@ namespace Anvil.ViewModels
                     _nftsViewModel ??= new NFTViewModel(_rpcProvider);
                     CurrentView = _nftsViewModel;
                     break;
+                case "Forensic":
+                    _forensicViewModel ??= new ForensicViewModel(_rpcProvider);
+                    CurrentView = _forensicViewModel;
+                    break;
                 default:
                     break;
             }
@@ -170,6 +175,7 @@ namespace Anvil.ViewModels
 
         private string _networkConnectionStatus = "Checking network..";
         private NFTViewModel _nftsViewModel;
+        private ForensicViewModel _forensicViewModel;
 
         public string NetworkConnectionStatus
         {

@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
+using Avalonia.Threading;
 using ReactiveUI;
 using Solnet.Programs.Utilities;
 using Solnet.Rpc;
@@ -108,19 +109,13 @@ namespace Anvil.ViewModels.NFTs
 
         public string Status
         {
-            get =>_status;
+            get => _status;
             set => this.RaiseAndSetIfChanged(ref _status, value);
         }
 
 
         public byte[] NftData { get; set; }
 
-
-        public double Progress
-        {
-            get => _progress;
-            set => this.RaiseAndSetIfChanged(ref _progress, value);
-        }
 
 
         private Bitmap _bmp;
@@ -137,7 +132,7 @@ namespace Anvil.ViewModels.NFTs
             set => this.RaiseAndSetIfChanged(ref _canQueryHolders, value);
         }
 
-        
+
         private bool _canExportMints = false;
         public bool CanExportMints
         {
@@ -145,7 +140,7 @@ namespace Anvil.ViewModels.NFTs
             set => this.RaiseAndSetIfChanged(ref _canExportMints, value);
         }
 
-        
+
         private bool _canExportHolders = false;
         public bool CanExportHolders
         {
@@ -153,7 +148,7 @@ namespace Anvil.ViewModels.NFTs
             set => this.RaiseAndSetIfChanged(ref _canExportHolders, value);
         }
 
-        
+
 
         private List<string> _mints;
         public List<string> Mints
@@ -238,59 +233,72 @@ namespace Anvil.ViewModels.NFTs
             var metaAccs = await rpc.GetProgramAccountsAsync("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s",
                 memCmpList: new List<MemCmp>() { new MemCmp() { Bytes = auth, Offset = 326 } });
 
-
             List<string> mintList = new();
-
-            foreach(var acc in metaAccs.Result)
+            foreach (var acc in metaAccs.Result)
             {
                 var bytes = Convert.FromBase64String(acc.Account.Data[0]);
                 var pkey = new ReadOnlySpan<byte>(bytes).GetPubKey(33);
                 mintList.Add(pkey.Key);
             }
 
-
             Mints = mintList;
-
             CanExportMints = true;
-
             ShowCollectionOwners = true;
 
             Dictionary<string, OwnerCountVM> accounts = new();
             int tot = 0;
-            Pairs = new();
-
-            
-
-            foreach (var mint in Mints)
+            await Task.Run(() =>
             {
-                Status = $"Fetching Owners {tot}/{Mints.Count}...";
+                List<string> addresses = new();
+                var batcher = new SolanaRpcBatchWithCallbacks(rpc);
+                batcher.AutoExecute(Solnet.Rpc.Types.BatchAutoExecuteMode.ExecuteWithCallbackFailures, 100);
 
-
-                var largest = await rpc.GetTokenLargestAccountsAsync(mint);
-
-                if (largest.Result.Value.Count > 0)
+                foreach (var mint in Mints)
                 {
-
-                    var acc = await rpc.GetTokenAccountInfoAsync(largest.Result.Value[0].Address);
-
-                    var owner = acc.Result.Value.Data.Parsed.Info.Owner;
-
-                    if (!accounts.TryGetValue(owner, out OwnerCountVM vm))
+                    batcher.GetTokenLargestAccounts(mint, callback: (res, e) =>
                     {
-                        vm = new()
-                        {
-                            Owner = owner
-                        };
-                        accounts.Add(owner, vm);
-                        Pairs.Add(vm);
-                    }
+                        Status = $"Fetching Token Accs {tot}/{Mints.Count}...";
+                        if (res.Value?.Count > 0)
+                            lock (addresses)
+                            {
+                                addresses.Add(res.Value[0].Address);
+                                tot++;
+                            }
+                    });
+                }
+                batcher.Flush();
+                tot = 0;
+                foreach (var acc in addresses)
+                {
+                    batcher.GetTokenAccountInfo(acc, callback: (a, e) =>
+                    {
+                        Status = $"Fetching Owners {tot}/{Mints.Count}...";
 
-                    vm.Count++;
+                        var owner = a.Value.Data.Parsed.Info.Owner;
+
+                        lock (accounts)
+                        {
+                            if (!accounts.TryGetValue(owner, out OwnerCountVM vm))
+                            {
+                                vm = new()
+                                {
+                                    Owner = owner
+                                };
+                                accounts.Add(owner, vm);
+
+                                Dispatcher.UIThread.Post(() => Pairs.Add(vm));
+                            }
+
+                            vm.Count++;
+                            tot++;
+                        }
+                    });
+
                 }
 
-                tot++;
-                Progress = (double)tot / Mints.Count * 100;
-            }
+                batcher.Flush();
+
+            });
 
             Status = "";
 
@@ -330,7 +338,7 @@ namespace Anvil.ViewModels.NFTs
                 Title = "Export Owners",
                 DefaultExtension = ".csv",
                 Directory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                Filters = new List<FileDialogFilter>() {  new FileDialogFilter() { Extensions = new List<string>() { "csv"}, Name = "Comma-Separated Values" } }
+                Filters = new List<FileDialogFilter>() { new FileDialogFilter() { Extensions = new List<string>() { "csv" }, Name = "Comma-Separated Values" } }
             };
 
 
@@ -401,7 +409,7 @@ namespace Anvil.ViewModels.NFTs
         public async void Search()
         {
             IsProcessing = true;
-            Progress = 0;
+
             List<byte[]> seeds = new List<byte[]>();
             var metaProgram = new PublicKey("metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s");
             seeds.Add(System.Text.Encoding.UTF8.GetBytes("metadata"));
@@ -431,21 +439,15 @@ namespace Anvil.ViewModels.NFTs
             var jsonDoc = JsonDocument.Parse(json);
             var newJson = JsonSerializer.Serialize(jsonDoc, new JsonSerializerOptions { WriteIndented = true });
 
-
-
-
             Result = newJson;
-
-
             IsProcessing = false;
-            Progress = 0;
         }
 
         private string ParseUri(byte[] data)
         {
 
             var span = new ReadOnlySpan<byte>(data);
-            var len = span.GetString(115, out var uri);
+            var len = span.GetBorshString(115, out var uri);
             var len2 = uri.Length;
             return uri;
         }
